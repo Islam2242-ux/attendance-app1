@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
+import 'iu/home_screen.dart' show HomeScreen;
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
@@ -26,9 +28,9 @@ Future<void> main() async {
       ),
     );
     // Koneksi Firebase berhasil
-    print("Firebase Terhubung ke:");
-    print("API Key: ${Firebase.app().options.apiKey}");
-    print("Project ID: ${Firebase.app().options.projectId}");
+    print("KAU Terhubung dengan Firebase:");
+    print("API Key KAU: ${Firebase.app().options.apiKey}");
+    print("Project ID KAU: ${Firebase.app().options.projectId}");
   } catch (e) {
     // Koneksi Firebase gagal
     print("Firebase gagal terhubung: $e");
@@ -46,31 +48,6 @@ class TestApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false, // remove debug banner
       home: const HomeScreen(), // HomeScreen class
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          SizedBox(
-            height: 50, // Header
-            child: Placeholder(),
-          ),
-          Expanded(
-            child: Placeholder(), // Content
-          ),
-          SizedBox(
-            height: 50, // Footer
-            child: Placeholder(),
-          ),
-        ],
-      ),
     );
   }
 }
