@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-import 'iu/home_screen.dart' show HomeScreen;
+import 'ui/home_screen.dart' show HomeScreen;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
