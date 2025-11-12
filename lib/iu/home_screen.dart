@@ -45,7 +45,7 @@ class HomeScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const AbsentScreen(),
+                          builder: (context) => const AttendScreen(), //TODO
                         ),
                       );
                     },
@@ -76,7 +76,7 @@ class HomeScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const AttendScreen(),
+                          builder: (context) => const AbsentScreen(),//TODO
                         ),
                       );
                     },
