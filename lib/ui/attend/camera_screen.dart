@@ -90,7 +90,7 @@ class _CameraScreenState extends State<CameraScreen> with TickerProviderStateMix
             child: Container(
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: const Color(0xFF00E5FF).withOpacity(0.5),
+                  color: const Color.fromARGB(255, 0, 229, 255),
                   width: 2,
                 ),
               ),

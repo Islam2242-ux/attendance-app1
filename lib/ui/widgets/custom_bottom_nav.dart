@@ -5,63 +5,55 @@ class CustomBottomNav extends StatelessWidget {
   final Function(int) onTap;
 
   const CustomBottomNav({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
-  }) : super(key: key);
+  });
+
+  double _getNotchPosition(int index) {
+    return (index * 0.25) + 0.125;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final double width = MediaQuery.of(context).size.width;
+    double targetPos = _getNotchPosition(currentIndex);
+
+    return SizedBox(
       height: 90,
-      decoration: const BoxDecoration(
-        color: Color(0xFF1E40AF), // Dark Blue
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(30),
-          topRight: Radius.circular(30),
-        ),
-      ),
       child: Stack(
         children: [
-          // Custom Wave Shape (Simplified for Flutter)
+          // 1. Animated Background Curve (Lengkungan)
           Positioned(
             bottom: 0,
             left: 0,
             right: 0,
-            height: 90,
-            child: CustomPaint(
-              painter: BottomNavPainter(),
+            child: TweenAnimationBuilder<double>(
+              tween: Tween<double>(end: targetPos),
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.fastOutSlowIn,
+              builder: (context, animatedPos, child) {
+                return CustomPaint(
+                  size: Size(width, 70),
+                  painter: BNBCustomPainter(notchPosition: animatedPos),
+                );
+              },
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildNavItem(0, Icons.fingerprint, "Attend"),
-              _buildNavItem(1, Icons.history, "History"),
-              const SizedBox(width: 40), // Space for center curve
-              _buildNavItem(2, Icons.assignment_outlined, "Permit"),
-              _buildNavItem(3, Icons.person_outline, "Profile"),
-            ],
-          ),
-          // Center Floating Button Indicator
+
+          // 2. Bottom Navigation Items
           Positioned(
-            top: -20,
+            bottom: 0,
             left: 0,
             right: 0,
-            child: Center(
-              child: Container(
-                width: 60,
-                height: 60,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFDCFCE7), // Light Green
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0xFF1E40AF), width: 8),
-                ),
-                child: Icon(
-                  _getIconForIndex(currentIndex),
-                  color: const Color(0xFF16A34A),
-                ),
-              ),
+            height: 70,
+            child: Row(
+              children: [
+                Expanded(child: _buildNavItem(0, Icons.fingerprint, "Attend")),
+                Expanded(child: _buildNavItem(1, Icons.history, "History")),
+                Expanded(child: _buildNavItem(2, Icons.assignment_outlined, "Permit")),
+                Expanded(child: _buildNavItem(3, Icons.person_outline, "Profile")),
+              ],
             ),
           ),
         ],
@@ -69,57 +61,125 @@ class CustomBottomNav extends StatelessWidget {
     );
   }
 
-  IconData _getIconForIndex(int index) {
-    switch (index) {
-      case 0: return Icons.fingerprint;
-      case 1: return Icons.history;
-      case 2: return Icons.assignment_outlined;
-      case 3: return Icons.person;
-      default: return Icons.home;
-    }
-  }
-
   Widget _buildNavItem(int index, IconData icon, String label) {
-    final isSelected = currentIndex == index;
+    final bool isSelected = currentIndex == index;
+
     return GestureDetector(
       onTap: () => onTap(index),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: isSelected
-            ? BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                shape: BoxShape.circle,
-              )
-            : null,
-        child: Icon(
-          icon,
-          color: isSelected ? const Color(0xFF60A5FA) : Colors.white70,
-          size: 28,
-        ),
+      behavior: HitTestBehavior.opaque,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(end: isSelected ? 1.0 : 0.0),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.fastOutSlowIn,
+        builder: (context, t, child) {
+          final double dynamicOffset = -20.0 * t;
+          final double shadowOpacity = 0.15 * t;
+
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Transform.translate(
+                offset: Offset(0, dynamicOffset),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Color.lerp(Colors.transparent, Colors.white, t),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                       BoxShadow(
+                        color: Colors.black.withOpacity(shadowOpacity),
+                        blurRadius: 12,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 5)
+                      )
+                    ]
+                  ),
+                  child: Icon(
+                    icon,
+                    color: Color.lerp(Colors.white.withOpacity(0.7), const Color(0xFF1E40AF), t),
+                    size: 26,
+                  ),
+                ),
+              ),
+              
+              if (t < 0.5)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Opacity(
+                    opacity: (1.0 - t * 2).clamp(0.0, 1.0),
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.7),
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                )
+              else
+                const SizedBox(height: 17),
+            ],
+          );
+        },
       ),
     );
   }
 }
 
-class BottomNavPainter extends CustomPainter {
+class BNBCustomPainter extends CustomPainter {
+  final double notchPosition;
+
+  BNBCustomPainter({required this.notchPosition});
+
   @override
   void paint(Canvas canvas, Size size) {
-    Paint paint = Paint()..color = const Color(0xFF1E40AF);
+    Paint paint = Paint()
+      ..color = const Color(0xFF1E40AF) // Warna Utama (Dark Blue)
+      ..style = PaintingStyle.fill;
+
+    // ----- Definisi Path Utama (Lekukan) -----
     Path path = Path();
-    
-    path.moveTo(0, 20);
-    path.quadraticBezierTo(size.width * 0.20, 0, size.width * 0.35, 0);
-    path.quadraticBezierTo(size.width * 0.40, 0, size.width * 0.40, 20);
-    path.arcToPoint(Offset(size.width * 0.60, 20), radius: const Radius.circular(10.0), clockwise: false);
-    path.quadraticBezierTo(size.width * 0.60, 0, size.width * 0.65, 0);
-    path.quadraticBezierTo(size.width * 0.80, 0, size.width, 20);
+    double loc = size.width * notchPosition;
+    double notchWidth = 70;  
+    double notchDepth = 45;  
+    double smoothFactor = 55; 
+
+    path.moveTo(0, 0);
+    path.lineTo(loc - notchWidth, 0);
+    path.cubicTo(
+      loc - notchWidth + smoothFactor, 0,        
+      loc - notchWidth * 0.6, notchDepth * 0.8,  
+      loc, notchDepth,                           
+    );
+    path.cubicTo(
+      loc + notchWidth * 0.6, notchDepth * 0.8,  
+      loc + notchWidth - smoothFactor, 0,        
+      loc + notchWidth, 0                        
+    );
+    path.lineTo(size.width, 0);
     path.lineTo(size.width, size.height);
     path.lineTo(0, size.height);
     path.close();
 
+    // ----- MENGGAMBAR BAYANGAN -----
+
+    // 1. Bayangan Tebal di Bawah (memberi kesan melayang)
+    canvas.drawShadow(path, Colors.black.withOpacity(0.2), 10.0, true);
+
+    // 2. Bayangan Garis Pinggir di Sekitar Lekukan
+    // Untuk ini, kita bisa menggambar path yang sama dengan warna sedikit lebih gelap
+    // dan blur radius yang lebih kecil, tepat sebelum path utama.
+    // Atau, kita bisa membuat outline path yang terpisah.
+    // Metode ini akan menggambar shadow yang lebih fokus di tepi.
+    canvas.drawShadow(path, Colors.black.withOpacity(0.4), 3.0, true); // Bayangan lebih gelap dan fokus di tepi
+
+    // ----- MENGGAMBAR PATH UTAMA -----
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
+  bool shouldRepaint(BNBCustomPainter oldDelegate) {
+    return oldDelegate.notchPosition != notchPosition; 
+  }
 }

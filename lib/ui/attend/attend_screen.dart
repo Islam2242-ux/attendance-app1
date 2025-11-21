@@ -94,7 +94,7 @@ class _AttendScreenState extends State<AttendScreen> with TickerProviderStateMix
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4285F4), // Google Blue style
+                      color: const Color.fromARGB(255, 41, 120, 246), // Google Blue style
                       borderRadius: BorderRadius.circular(15),
                       boxShadow: [
                         BoxShadow(
@@ -175,13 +175,13 @@ class _AttendScreenState extends State<AttendScreen> with TickerProviderStateMix
                           Icon(
                             Icons.camera_alt,
                             size: 80,
-                            color: Colors.lightBlue[400],
+                            color: const Color.fromARGB(255, 41, 120, 246),
                           ),
                           const SizedBox(height: 10),
                           Text(
                             "TAP TO SCAN FACE",
                             style: TextStyle(
-                              color: Colors.lightBlue[400],
+                              color: const Color.fromARGB(255, 41, 120, 246),
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1.2,
                             ),

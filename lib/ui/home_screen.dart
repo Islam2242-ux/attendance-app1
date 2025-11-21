@@ -15,7 +15,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   int _currentIndex = 0;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  late AnimationController _cardAnimationController;
   
   final List<Widget> _screens = [
     const AttendScreen(),
@@ -39,128 +38,186 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       ),
     );
     
-    _cardAnimationController = AnimationController(
-      duration: const Duration(milliseconds: 800),
-      vsync: this,
-    );
-    
     _animationController.forward();
-    _cardAnimationController.forward();
   }
 
   @override
   void dispose() {
     _animationController.dispose();
-    _cardAnimationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
+      backgroundColor: const Color(0xFFF8F9FD), // Warna background abu sangat muda (bersih)
+      body: Column(
         children: [
-          // Blue Header Background
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: 280,
-            child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFF2563EB), // Primary Blue
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(40),
-                  bottomRight: Radius.circular(40),
-                ),
-              ),
+          // --- BAR 1: ADMIN USER (HEADER) ---
+          // Ini adalah bar paling atas yang terpisah
+          Container(
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 10, // Padding status bar
+              bottom: 25, // Padding bawah agar agak luas
+              left: 24,
+              right: 24,
             ),
-          ),
-
-          SafeArea(
-            child: Column(
+            decoration: const BoxDecoration(
+              color: Color(0xFF2563EB), // Warna Biru Utama
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(30),
+                bottomRight: Radius.circular(30),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 10,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Row(
               children: [
-                // Header Info
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                  child: Row(
-                    children: [
-                      const CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.person, color: Color(0xFF2563EB), size: 30),
+                const CircleAvatar(
+                  radius: 26,
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.person, color: Color(0xFF2563EB), size: 32),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text(
+                        "Welcome Back",
+                        style: TextStyle(color: Colors.white70, fontSize: 14),
                       ),
-                      const SizedBox(width: 16),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            "Welcome Back",
-                            style: TextStyle(color: Colors.white70, fontSize: 14),
-                          ),
-                          Text(
-                            "Admin User",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-                        onPressed: () {},
+                      Text(
+                        "Admin User",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),
                 ),
+                IconButton(
+                  icon: const Icon(Icons.notifications_outlined, color: Colors.white, size: 28),
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ),
 
-                // Banner "How Are You" with Chart Animation
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10),
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 5),
+          // --- KONTEN SCROLLABLE DI BAWAH HEADER ---
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  // --- BAR 2: BANNER "HOW ARE YOU" ---
+                  FadeTransition(
+                    opacity: _fadeAnimation,
+                    child: Container(
+                      margin: const EdgeInsets.fromLTRB(24, 24, 24, 10),
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        // GARIS TEPIAN HANYA PADA BAWAH (Border Bottom)
+                        border: const Border(
+                          bottom: BorderSide(
+                            color: Color(0xFF2563EB), // Warna biru sama dengan header
+                            width: 6.0, // Ketebalan garis
+                          ),
                         ),
-                      ],
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2563EB).withOpacity(0.1),
+                            blurRadius: 15,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          // Animated chart illustration
+                          const SizedBox(
+                            height: 70,
+                            width: 90,
+                            child: AnimatedChart(),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  "How Are You",
+                                  style: TextStyle(
+                                    fontSize: 26,
+                                    fontWeight: FontWeight.w800, // Lebih tebal
+                                    color: Color(0xFF1E293B),
+                                    letterSpacing: -0.5,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  "Make your day productive",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
+                  ),
+
+                  // --- TAB SELECTOR (PILL SHAPE) ---
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
                     child: Row(
                       children: [
-                        // Animated chart illustration
-                        SizedBox(
-                          height: 60,
-                          width: 80,
-                          child: AnimatedChart(),
-                        ),
-                        const SizedBox(width: 20),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                "How Are You",
-                                style: TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E40AF), // Dark Blue Pill
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF1E40AF).withOpacity(0.3),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
                               ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              // Icon kecil di sebelah teks tab untuk mempermanis
+                              Icon(
+                                _currentIndex == 0 ? Icons.check_circle :
+                                _currentIndex == 1 ? Icons.history :
+                                _currentIndex == 2 ? Icons.edit_document : Icons.person,
+                                color: Colors.white, 
+                                size: 18
+                              ),
+                              const SizedBox(width: 8),
                               Text(
-                                "Make your day productive",
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
+                                _currentIndex == 0 ? "Check In" : 
+                                _currentIndex == 1 ? "History" :
+                                _currentIndex == 2 ? "Permission" : "Profile",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15,
                                 ),
                               ),
                             ],
@@ -169,69 +226,37 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ],
                     ),
                   ),
-                ),
 
-                // Tab Selector (Pill Shape)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16),
-                  child: Row(
-                    children: [
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E40AF), // Dark Blue Pill
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Text(
-                          _currentIndex == 0 ? "Check In" : 
-                          _currentIndex == 1 ? "History" :
-                          _currentIndex == 2 ? "Permission" : "Profile",
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Dynamic Content Area with Animation
-                Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 500),
+                  // --- DYNAMIC CONTENT AREA (Isi Halaman) ---
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 400),
+                    switchInCurve: Curves.fastOutSlowIn,
+                    switchOutCurve: Curves.fastOutSlowIn,
                     transitionBuilder: (Widget child, Animation<double> animation) {
                       return FadeTransition(
                         opacity: animation,
-                        child: child,
+                        child: SlideTransition(
+                          position: Tween<Offset>(
+                            begin: const Offset(0, 0.05), // Muncul sedikit dari bawah
+                            end: Offset.zero,
+                          ).animate(animation),
+                          child: child,
+                        ),
                       );
                     },
                     child: Container(
                       key: ValueKey<int>(_currentIndex),
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                        border: Border.all(color: const Color(0xFF2563EB), width: 2),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF2563EB).withOpacity(0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
+                      // Kita hapus fixed height container agar mengikuti konten (Expanded di parent akan handle, 
+                      // tapi karena ini dalam ScrollView, kita biarkan ukurannya menyesuaikan konten anak)
+                      constraints: BoxConstraints(
+                        minHeight: MediaQuery.of(context).size.height * 0.5, // Minimal setengah layar
                       ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(28),
-                        child: _screens[_currentIndex],
-                      ),
+                      margin: const EdgeInsets.only(left: 0, right: 0, bottom: 24),
+                      child: _screens[_currentIndex],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -241,8 +266,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         onTap: (index) {
           setState(() {
             _currentIndex = index;
-            _cardAnimationController.reset();
-            _cardAnimationController.forward();
           });
         },
       ),
@@ -250,7 +273,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 }
 
-// Animated Chart Widget
+// Animated Chart Widget (Grafik Batang di Banner)
 class AnimatedChart extends StatefulWidget {
   const AnimatedChart({super.key});
 
@@ -275,8 +298,8 @@ class _AnimatedChartState extends State<AnimatedChart> with TickerProviderStateM
         CurvedAnimation(
           parent: _controller,
           curve: Interval(
-            index * 0.2,
-            0.5 + index * 0.2,
+            index * 0.1,
+            0.6 + index * 0.1,
             curve: Curves.elasticOut,
           ),
         ),
@@ -298,52 +321,25 @@ class _AnimatedChartState extends State<AnimatedChart> with TickerProviderStateM
       crossAxisAlignment: CrossAxisAlignment.end,
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        AnimatedBar(
-          animation: _animations[0],
-          height: 20,
-          color: Colors.lightBlue[100]!,
-        ),
-        AnimatedBar(
-          animation: _animations[1],
-          height: 40,
-          color: Colors.lightBlue[200]!,
-        ),
-        AnimatedBar(
-          animation: _animations[2],
-          height: 30,
-          color: Colors.lightBlue[300]!,
-        ),
-        AnimatedBar(
-          animation: _animations[3],
-          height: 50,
-          color: Colors.lightBlue[400]!,
-        ),
+        _buildBar(height: 25, color: Colors.lightBlue[100]!, anim: _animations[0]),
+        _buildBar(height: 55, color: Colors.lightBlue[300]!, anim: _animations[1]), // Bar tertinggi ke-2
+        _buildBar(height: 35, color: Colors.lightBlue[200]!, anim: _animations[2]),
+        _buildBar(height: 65, color: const Color(0xFF2563EB), anim: _animations[3]), // Bar paling tinggi (Biru Tua)
       ],
     );
   }
-}
 
-class AnimatedBar extends StatelessWidget {
-  final Animation<double> animation;
-  final double height;
-  final Color color;
-
-  const AnimatedBar({
-    super.key,
-    required this.animation,
-    required this.height,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildBar({required double height, required Color color, required Animation<double> anim}) {
     return AnimatedBuilder(
-      animation: animation,
+      animation: anim,
       builder: (context, child) {
         return Container(
-          width: 10,
-          height: height * animation.value,
-          color: color,
+          width: 12,
+          height: height * anim.value,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+          ),
         );
       },
     );
